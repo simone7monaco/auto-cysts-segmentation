@@ -1,0 +1,11 @@
+bce:
+  type: losses.BCEWithLogitsLoss
+
+aufloss:
+  type: losses.AsymmetricUnifiedFocalLoss
+
+sufloss:
+  type: losses.SymmetricUnifiedFocalLoss
+
+base:
+  type: losses.ComboLoss 

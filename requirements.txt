@@ -1,0 +1,9 @@
+numpy
+matplotlib
+pandas
+easydict
+pytorch_lightning
+albumentations
+segmentation_models_pytorch
+pytorch_toolbelt
+seaborn
