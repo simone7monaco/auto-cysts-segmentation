@@ -1,11 +1,36 @@
-# AI for automated cyst segmentation on engineered kidney tubules
+# AI models for automated segmentation of engineered polycystic kidney tubules
 **Authors:** Monaco S., Bussola N., Buttò S., Sona D., Giobergia F., Jurman G., Xinaris C, Apiletti D.
 
 Repository for the PyTorch implementation of the segmentation pipeline proposed in the paper.
 
 ## Abstract
-Currently affecting about 12.4 million people worldwide, Autosomal dominant polycystic kidney disease (ADPKD) is a major life-threatening genetically inherited human disease and the most common hereditary kidney pathology, marked by the progressive growth of renal cysts. No cure is known for ADPKD, and even pharmacological treatment options are quite limited, and just mitigating and slowing the progression of the pathology. In fact, clinically available and experimental drugs currently target the characterizing phenotypes of the disease, namely, the number and the size of cysts, aiming at limiting both these factors.
-Thus, automating detection and evolution of cysts' features is a critical step in the novel drug development process. Artificial Intelligence methods and, in particular, Deep Learning algorithms can provide powerful and effective solutions for such task, and different architectures have indeed been proposed in the literature in the last few years. Here we comparatively review some of the aforementioned alternative segmentation processes, using as a testbed a suite of original RGB sequential immunofluorescence images from 4 \textit{in vitro} experiments employing 32 kidney tubules. To reach a deeper understanding of the detection process, we specialize the performance metrics used for the algorithms' evaluation at both the pixel and the cyst level. Overall, two architectures stand out as best performing, namely UNet++ and UACANet: the latter, in particular, employs a self-attention mechanism introducing some explainability aspects to be further exploited in future developments, thus making it the more promising algorithms to build upon towards a more refined cysts detection platform.
+Autosomal dominant polycystic kidney disease (ADPKD) is a monogenic, rare disease, characterized by the formation of multiple cysts that grow out of the renal tubules. Despite intensive attempts to develop new drugs or repurpose existing ones, there is currently no definitive cure for ADPKD. This is primarily due to the complex and variable pathogenesis of the disease and the lack of models that can faithfully reproduce the human phenotype.
+Therefore, the development of models that allow automated detection and growth directly on human kidney tissue is a crucial step in the search for efficient therapeutic solutions.
+Artificial Intelligence methods, and deep learning algorithms in particular, can provide powerful and effective solutions to such tasks, and indeed various architectures have been proposed in the literature in recent years.
+Here, we comparatively review state-of-the-art deep learning segmentation models, using as a testbed a set of sequential RGB immunofluorescence images from 4 _in vitro_ experiments with 32 engineered polycystic kidney tubules.
+To gain a deeper understanding of the detection process, we specialize the performance metrics used to evaluate the algorithms at both the pixel and cyst-wise levels.
+Overall, two models stand out as the best performing, namely UNet++ and UACANet: the latter uses a self-attention mechanism introducing some explainability aspects that can be further exploited in future developments, thus making it the most promising algorithm to build upon towards a more refined cyst-detection platform.
+UACANet models achieve a cyst-wise Intersection over Union of 0.83, 0.91 for Recall, and 0.92 for Precision when applied to detect large-size cysts. On all-size cysts, UACANet averages at 0.624 pixel-wise Intersection over Union. The code to reproduce all results is freely available in a public GitHub repository.
+
+## Configuration and validation
+Dependency can be installed using the following command:
+
+```
+pip install -r requirements.txt
+```
+
+You can run the code to train and evaluate the models by
+```
+python run.py
+```
+```
+usage: run.py [-h] [-c CONFIG_PATH] [-d DATASET] [--tag TAG] [-e EXP] [--single_exp SINGLE_EXP] [-t TUBE] 
+              [-m MODEL] [-l LOSS] [-k K] [-s SEED] [--stratify_fold [STRATIFY_FOLD]] [-f FOCUS_SIZE]
+              [--tiling [TILING]] [--save_results [SAVE_RESULTS]] [--wb [WB]] [--evaluate_exp [EVALUATE_EXP]]
+
+```
+
+The script performs a sigle step of a LOTO cross validation (read the paper for more on this).
 
 ## Cite
 
