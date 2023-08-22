@@ -34,8 +34,8 @@ class SegmentationDataset(Dataset):
 
         image_path, mask_path = self.samples[idx]
 
-        image = np.array(Image.open(image_path))
-        mask = imread(mask_path)
+        image = imread(image_path).astype(np.float32)
+        mask = imread(mask_path).astype(np.float32)
 
         # apply augmentations
         sample = self.transform(image=image, mask=mask)
@@ -54,10 +54,14 @@ class SegmentationDataset(Dataset):
 class CystDataModule(pl.LightningDataModule):
     def __init__(self, verbose=True, **hparams):
         super().__init__()
+        
         for k in ['model', 'optimizer', 'loss']:
             hparams.pop(k)
         self.save_hyperparameters()
         self.verbose = verbose
+
+        if not self.hparams['image_path'].exists():
+            raise ValueError(f"Image path {self.hparams['image_path']} does not exist. Perform a run using Wandb to get the dataset or download it from another source.")
 
         splits = split_dataset(self.hparams)
         self.train_samples=splits['train']

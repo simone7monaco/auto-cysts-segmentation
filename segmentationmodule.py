@@ -32,6 +32,9 @@ class SegmentCyst(pl.LightningModule):
         self.max_val_iou = 0
         self.timing_result = pd.DataFrame(columns=['name', 'time'])
 
+        self.validation_step_outputs = []
+        self.test_step_outputs = []
+
     def forward(self, batch: torch.Tensor, masks: torch.Tensor=None) -> torch.Tensor:
         if masks is not None:
             return self.model(batch, masks)
@@ -142,10 +145,13 @@ class SegmentCyst(pl.LightningModule):
 
         self.log("valid_loss", result["valid_loss"])
         self.log("val_iou", result["val_iou"])
+
+        self.validation_step_outputs.append(result)
         return result
 
-    def validation_epoch_end(self, outputs):
-        avg_val_iou = find_average(outputs, "val_iou")
+    def on_validation_epoch_end(self):
+        avg_val_iou = find_average(self.validation_step_outputs,
+                                   "val_iou")
         
         self.log("epoch", float(self.trainer.current_epoch))
         self.log("val_iou", avg_val_iou)
@@ -175,9 +181,10 @@ class SegmentCyst(pl.LightningModule):
             logits_ = (logits_.cpu().numpy() > self.hparams.test_parameters['threshold']).astype(np.uint8)
             Image.fromarray(logits_*255).save(self.hparams.checkpoint_callback['dirpath'] /'result'/'test'/f"{name}.png")
         self.timing_result.loc[len(self.timing_result)] = timing
+        self.test_step_outputs.append(result)
         return result
     
-    def test_epoch_end(self, outputs):
-        print(f"Test IoU: {find_average(outputs, 'test_iou')}")
+    def on_test_epoch_end(self):
+        print(f"Test IoU: {find_average(self.test_step_outputs, 'test_iou')}")
         self.timing_result.to_csv(self.hparams.checkpoint_callback['dirpath'] / "timing.csv")
 

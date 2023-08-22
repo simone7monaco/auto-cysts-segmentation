@@ -2,7 +2,7 @@ numpy
 matplotlib
 pandas
 easydict
-pytorch_lightning
+pytorch_lightning>=2.0.0
 albumentations
 segmentation_models_pytorch
 pytorch_toolbelt

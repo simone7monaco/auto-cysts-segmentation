@@ -147,3 +147,4 @@ sections/
 *img
 *.zip
 *.sbatch
+lightning_logs/
