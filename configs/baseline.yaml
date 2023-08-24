@@ -21,25 +21,24 @@ scheduler:
   T_0: 10
   T_mult: 2
 
-train_parameters:
-  epochs: 1
-  batch_size: 4
-
 checkpoint_callback:
-  type: pytorch_lightning.callbacks.ModelCheckpoint
-  dirpath: "./cyst_checkpoints/Nature_v3"
-  monitor: val_iou
+  dirpath: "./cyst_checkpoints/Nature_v4"
+  monitor: val_loss
   verbose: True
-  mode: max
+  mode: min
   save_top_k: 1
   
 earlystopping_callback:
-  type: pytorch_lightning.callbacks.early_stopping.EarlyStopping
-  monitor: valid_loss
+  monitor: val_loss
   min_delta: 0.005
   patience: 10
-  verbose: True
+  verbose: False
   mode: min
+
+noG_preprocessing: False
+train_parameters:
+  epochs: 100
+  batch_size: 4
 
 val_parameters:
   batch_size: 4

@@ -1,3 +1,4 @@
+import shutil
 import yaml
 import json
 
@@ -7,19 +8,30 @@ from dataloaders import CystDataModule
 
 import torch
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 
 import wandb
 
 
 def train(args, hparams, name=None):
+    ##########################################################
     wandb.init(project="rene-policistico-cyst_segmentation",
             tags=[args.tag] if args.tag else None, reinit=True,
-            name=name
+            name=None
             ) if args.wb else None
-            
+    name = wandb.run.name if args.wb else "foo"
     hparams = init_training(args, hparams, name, tiling=getattr(args, 'tiling', None))
 
+    #################
+    if name == "foo":
+        # delete everything in the folder
+        for f in hparams["checkpoint_callback"]["dirpath"].glob("*"):
+            if f.is_dir():
+                shutil.rmtree(f)
+            else:
+                f.unlink()
+                
     test_preds = hparams["checkpoint_callback"]["dirpath"]/'result'/'test'
     test_preds.mkdir(exist_ok=True, parents=True)
 
@@ -46,8 +58,8 @@ def train(args, hparams, name=None):
                 raise NotImplemented("Loss function not implemented")
         delattr(args, 'loss')
 
-    earlystopping_callback = object_from_dict(hparams["earlystopping_callback"])
-    checkpoint_callback = object_from_dict(hparams["checkpoint_callback"])
+    earlystopping_callback = EarlyStopping(**hparams["earlystopping_callback"])
+    checkpoint_callback = ModelCheckpoint(**hparams["checkpoint_callback"])
 
     max_epochs = hparams['train_parameters']['epochs']
 
@@ -74,7 +86,7 @@ def train(args, hparams, name=None):
         
     trainer = pl.Trainer(
         accelerator='gpu' if torch.cuda.is_available() else 0,
-        devices=[1],#torch.cuda.device_count(),
+        devices=[0],#torch.cuda.device_count(),
         accumulate_grad_batches=args.acc_grad if hasattr(args, 'acc_grad') else 1,
         max_epochs=max_epochs,
         benchmark=True,

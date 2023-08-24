@@ -219,6 +219,8 @@ def init_training(args, hparams, name, tiling=False):
     hparams["checkpoint_callback"]["dirpath"] /= name
     hparams["checkpoint_callback"]["dirpath"].mkdir(exist_ok=True, parents=True)
 
+    if hasattr(args, 'noG_preprocessing'):
+        hparams["noG_preprocessing"] = args.noG_preprocessing
     
     hparams['seed'] = args.seed
     hparams['tube'] = args.tube

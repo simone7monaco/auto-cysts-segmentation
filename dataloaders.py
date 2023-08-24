@@ -10,7 +10,6 @@ from torch.utils.data import Dataset, DataLoader
 import albumentations as albu
 from albumentations.core.serialization import from_dict
 
-from PIL import Image
 from skimage.io import imread
 from utils import get_samples, split_dataset
 
@@ -20,12 +19,12 @@ class SegmentationDataset(Dataset):
         self,
         samples: List[Tuple[Path, Path]],
         transform: albu.Compose,
+        noG=False,
     ):
         self.samples = samples
         self.transform = transform
-
-
         self.length = len(self.samples)
+        self.noG = noG
 
     def __len__(self) -> int:
         return self.length
@@ -36,6 +35,9 @@ class SegmentationDataset(Dataset):
 
         image = imread(image_path).astype(np.float32)
         mask = imread(mask_path).astype(np.float32)
+
+        if self.noG: # TODO: What if done after the augmentation the image?
+            image[:, :, 1] = 0
 
         # apply augmentations
         sample = self.transform(image=image, mask=mask)
@@ -87,7 +89,7 @@ class CystDataModule(pl.LightningDataModule):
 
     def train_dataloader(self):
         result = DataLoader(
-            SegmentationDataset(self.train_samples, self.train_aug),
+            SegmentationDataset(self.train_samples, self.train_aug, noG=self.hparams["noG_preprocessing"]),
             batch_size=self.batch_size,
             num_workers=self.hparams.num_workers,
             shuffle=True,
@@ -99,7 +101,7 @@ class CystDataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         result = DataLoader(
-            SegmentationDataset(self.val_samples, self.val_aug),
+            SegmentationDataset(self.val_samples, self.val_aug, noG=self.hparams["noG_preprocessing"]),
             batch_size=self.val_batch_size,
             num_workers=self.hparams.num_workers,
             shuffle=False,
@@ -111,7 +113,7 @@ class CystDataModule(pl.LightningDataModule):
 
     def test_dataloader(self):
         result = DataLoader(
-            SegmentationDataset(self.test_samples, self.test_aug),
+            SegmentationDataset(self.test_samples, self.test_aug, noG=self.hparams["noG_preprocessing"]),
             batch_size=self.val_batch_size,
             num_workers=self.hparams.num_workers,
             shuffle=False,
