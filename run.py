@@ -42,7 +42,7 @@ def main(args):
     with open(args.config_path) as f:
         hparams = yaml.load(f, Loader=yaml.SafeLoader)
 
-    name = "crossval_" + "_".join([f"{hp}_{getattr(args, hp)}" for hp in ["model", "loss", "tube", "exp", "seed"] if getattr(args, hp, None) is not None])
+    name = "crossval_" + "_".join([f"{hp}_{getattr(args, hp)}" for hp in ["model", "loss", "tube", "exp", "noG_preprocessing", "seed"] if getattr(args, hp, None) is not None])
     
     torch.set_float32_matmul_precision('medium')
     train(args, hparams, name)

@@ -1,7 +1,7 @@
 ---
 seed: 1989
 
-num_workers: 8
+num_workers: 16
 experiment_name: "training"
 image_path: "artifacts/dataset:v0/images"
 mask_path: "artifacts/dataset:v0/masks"
@@ -64,14 +64,14 @@ train_aug:
       #   always_apply: False
       #   max_size: 800
       #   p: 1
-      - __class_fullname__: albumentations.augmentations.transforms.PadIfNeeded
-        always_apply: false
-        border_mode: 0
-        mask_value: 0
-        min_height: 800
-        min_width: 800
-        p: 1
-        value: 0
+      # - __class_fullname__: albumentations.augmentations.transforms.PadIfNeeded
+      #   always_apply: false
+      #   border_mode: 0
+      #   mask_value: 0
+      #   min_height: 800
+      #   min_width: 800
+      #   p: 1
+      #   value: 0
 #       - __class_fullname__: albumentations.augmentations.transforms.RandomCrop
 #         always_apply: False
 #         height: 512
@@ -95,9 +95,9 @@ train_aug:
       - __class_fullname__: albumentations.augmentations.transforms.RandomGamma
         always_apply: false
         p: 0.5
-      # - __class_fullname__: albumentations.augmentations.transforms.CLAHE
-      #   always_apply: false
-      #   p: 0.5
+      - __class_fullname__: albumentations.augmentations.transforms.CLAHE
+        always_apply: false
+        p: 0.5
       - __class_fullname__: albumentations.augmentations.transforms.Normalize
         always_apply: false
         max_pixel_value: 255.0
@@ -122,22 +122,22 @@ val_aug:
       #   always_apply: False
       #   max_size: 800
       #   p: 1
-      - __class_fullname__: albumentations.augmentations.transforms.PadIfNeeded
-        always_apply: false
-        border_mode: 0
-        mask_value: 0
-        min_height: 800
-        min_width: 800
-        p: 1
-        value: 0
+      # - __class_fullname__: albumentations.augmentations.transforms.PadIfNeeded
+      #   always_apply: false
+      #   border_mode: 0
+      #   mask_value: 0
+      #   min_height: 800
+      #   min_width: 800
+      #   p: 1
+      #   value: 0
       - __class_fullname__: albumentations.augmentations.transforms.RandomBrightnessContrast
         p: 1.0
       - __class_fullname__: albumentations.augmentations.transforms.RandomGamma
         always_apply: false
         p: 0.5
-      # - __class_fullname__: albumentations.augmentations.transforms.CLAHE
-      #   always_apply: false
-      #   p: 0.5
+      - __class_fullname__: albumentations.augmentations.transforms.CLAHE
+        always_apply: false
+        p: 0.5
       - __class_fullname__: albumentations.augmentations.transforms.Normalize
         always_apply: false
         max_pixel_value: 255.0

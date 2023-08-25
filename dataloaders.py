@@ -33,8 +33,8 @@ class SegmentationDataset(Dataset):
 
         image_path, mask_path = self.samples[idx]
 
-        image = imread(image_path).astype(np.float32)
-        mask = imread(mask_path).astype(np.float32)
+        image = imread(image_path)
+        mask = imread(mask_path)
 
         if self.noG: # TODO: What if done after the augmentation the image?
             image[:, :, 1] = 0

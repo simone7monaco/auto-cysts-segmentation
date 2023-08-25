@@ -20,7 +20,7 @@ def train(args, hparams, name=None):
             tags=[args.tag] if args.tag else None, reinit=True,
             name=None
             ) if args.wb else None
-    name = wandb.run.name if args.wb else "foo"
+    # name = wandb.run.name if args.wb else "foo"
     hparams = init_training(args, hparams, name, tiling=getattr(args, 'tiling', None))
 
     #################
@@ -89,7 +89,6 @@ def train(args, hparams, name=None):
         devices=[0],#torch.cuda.device_count(),
         accumulate_grad_batches=args.acc_grad if hasattr(args, 'acc_grad') else 1,
         max_epochs=max_epochs,
-        benchmark=True,
         callbacks=[checkpoint_callback,
                 earlystopping_callback,
                 ],
@@ -98,6 +97,7 @@ def train(args, hparams, name=None):
         num_sanity_val_steps=3,
         sync_batchnorm=True,
         logger=logger,
+        precision=16,
     )
             
     if not (success).exists():
