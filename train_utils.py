@@ -25,7 +25,7 @@ def train(args, hparams, name=None):
 
     #################
     if name == "foo":
-        # delete everything in the folder
+        print(">> delete everything in the folder")
         for f in hparams["checkpoint_callback"]["dirpath"].glob("*"):
             if f.is_dir():
                 shutil.rmtree(f)
@@ -67,7 +67,7 @@ def train(args, hparams, name=None):
     model = SegmentCyst(**hparams,
                     discard_res=~args.save_results,
                     )
-
+    
     with (hparams["checkpoint_callback"]["dirpath"] / "split_samples.json").open('w') as file:
         json.dump({
             'train': str_from_samples(data.train_samples),
@@ -79,7 +79,7 @@ def train(args, hparams, name=None):
     logger = WandbLogger() if args.wb else None
     if logger:
         logger.log_hyperparams(hparams)
-        logger.watch(model, log='all', log_freq=1)
+        # logger.watch(model, log='all', log_freq=1)
 
     if getattr(args, 'seed', None) is not None:
         pl.seed_everything(args.seed)

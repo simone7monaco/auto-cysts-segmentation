@@ -45,9 +45,7 @@ class SegmentCyst(pl.LightningModule):
         self.test_metrics = torch.nn.ModuleDict({
             'iou': tm.JaccardIndex(task='binary'),
         })
-
-        self.validation_step_outputs = []
-        self.test_step_outputs = []
+        self.epoch_start_time = []
 
     def forward(self, batch: torch.Tensor, masks: torch.Tensor=None) -> torch.Tensor:
         if masks is not None:
@@ -74,11 +72,10 @@ class SegmentCyst(pl.LightningModule):
             return self.optimizers, [scheduler]
         return self.optimizers
     
-
     def log_images(self, features, masks, logits_, batch_idx, class_labels={0: "background", 1: "cyst"}):
         for img_idx, (image, y_true, y_pred) in enumerate(zip(features, masks, logits_)):
             if isinstance(self.trainer.logger, pl.loggers.tensorboard.TensorBoardLogger):
-                self.trainer.logger.experiment.add_image(f"Image/{batch_idx}_{img_idx}", image, 0)
+                # self.trainer.logger.experiment.add_image(f"Image/{batch_idx}_{img_idx}", image, 0)
                 self.trainer.logger.experiment.add_image(f"GroundTruth/{batch_idx}_{img_idx}", y_true, 0)
                 self.trainer.logger.experiment.add_image(f"Prediction/{batch_idx}_{img_idx}", y_pred, 0)
             elif isinstance(self.trainer.logger, pl.loggers.wandb.WandbLogger):
@@ -101,6 +98,8 @@ class SegmentCyst(pl.LightningModule):
                 Image.fromarray(y_true*255).save(self.train_images/f"{batch_idx}_{img_idx}_gt.png")
                 Image.fromarray(image).save(self.train_images/f"{batch_idx}_{img_idx}_img.png")
 
+    def on_epoch_start(self):
+        self.epoch_start_time.append(time())
     
     def training_step(self, batch, batch_idx):
         features = batch["features"]
@@ -136,7 +135,6 @@ class SegmentCyst(pl.LightningModule):
     def validation_step(self, batch, batch_id):
         features = batch["features"]
         masks = batch["masks"]
-        # result = {}
         
         if self.model_name in ['uacanet', 'pranet']:
             logits = self.forward(features, masks)
@@ -145,11 +143,8 @@ class SegmentCyst(pl.LightningModule):
         else:
             logits = self.forward(features)
             loss = self.loss(logits, masks)
-            # result["val_loss"] = loss
             
         logits_ = (logits > 0.5).cpu().detach().numpy().astype("float")
-
-        # result["val_iou"] = binary_mean_iou(logits, masks)
         
         if not self.hparams.discard_res and wandb.run is not None:
             if self.trainer.current_epoch % 5 == 0:
@@ -175,15 +170,28 @@ class SegmentCyst(pl.LightningModule):
             metric(logits, masks.int())
             self.log(f"val_{metric_name}", metric, on_step=True, on_epoch=True)
 
-        # self.validation_step_outputs.append(result)
-
     def on_train_epoch_end(self):
         self.log("epoch", float(self.trainer.current_epoch))
+
+    # def on_train_end(self):
+    #     import matplotlib.pyplot as plt
+    #     fig, ax = plt.subplots(2, 1, figsize=(6, 10))
+    #     self.train_metrics['iou'].plot(ax=ax[0])
+    #     self.val_metrics['iou'].plot(ax=ax[0])
+    #     self.val_metrics['dice'].plot(ax=ax[0])
+    #     ax[0].legend()
+
+    #     self.epoch_start_time = np.array(self.epoch_start_time) - self.epoch_start_time[0]
+    #     ax[1].plot(self.epoch_start_time, label='Epoch duration')
+    #     ax[1].set_xlabel('Epoch')
+    #     ax[1].set_ylabel('Time [s]')
+    #     ax[1].legend()
+
+    #     fig.savefig(self.hparams.checkpoint_callback['dirpath'] / 'metrics.png')
 
     def test_step(self, batch, batch_id):
         features = batch["features"]
         masks = batch["masks"]
-        # result = {}
     
         t0 = time()
         if self.model_name in ['uacanet', 'pranet']:
@@ -205,6 +213,4 @@ class SegmentCyst(pl.LightningModule):
         for metric_name, metric in self.test_metrics.items():
             metric(logits, masks.int())
             self.log(f"test_{metric_name}", metric, on_step=True, on_epoch=True)
-        # self.test_step_outputs.append(result)
-        # return result
     
