@@ -115,8 +115,8 @@ class SegmentCyst(pl.LightningModule):
         
         logits_ = (logits > 0.5).cpu().detach().numpy().astype("float")
         
-        if batch_idx == 0 and self.trainer.current_epoch % 2 == 0:
-            self.log_images(features, masks, logits_, batch_idx)
+        # if batch_idx == 0 and self.trainer.current_epoch % 2 == 0:
+        #     self.log_images(features, masks, logits_, batch_idx)
 
         for metric_name, metric in self.train_metrics.items():
             metric(logits, masks.int())

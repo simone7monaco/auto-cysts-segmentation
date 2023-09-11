@@ -33,11 +33,6 @@ def get_args():
     return parser.parse_args()
 
 def main(args):
-    if args.model in ["segformer", "esfpnet"]: 
-        print("Model not implemented")
-        if wandb.run: wandb.finish()
-        return
-
     os.environ["WANDB_START_METHOD"] = "fork"
     with open(args.config_path) as f:
         hparams = yaml.load(f, Loader=yaml.SafeLoader)

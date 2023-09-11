@@ -130,19 +130,11 @@ class Evaluator():
         self.annotP = annotP or Path.cwd() / 'annotations_original/full_dataset'
         self.predP = predP
             
-    def write_results(self):
+    def get_results(self):
         folder = self.predP.parent.parent
-        datafile_im = folder / "images_table.csv"
-        datafile_cy = folder / "cysts_table.csv"
-        if datafile_im.exists():
-            print(f"> Results tables in {folder.stem} already exists!")
-            return
-
         IM_df = None
         CYST_df = None
-        
         eval_name = folder.stem
-        
         paths = sorted(self.predP.glob('*.png'))
     
         for pred in tqdm(paths, desc=str(folder)):
@@ -154,9 +146,8 @@ class Evaluator():
             for s, v in unpack_name(name).items():
                 IM_s[s] = v
                 CYST_s[s] = v
-
-            # dict of cysts as {'state': state, 'areas': [AREA_real, AREA_pred]}
                 
+            # dict of cysts as {'state': state, 'areas': [AREA_real, AREA_pred]}
             assert (self.maskP / f'{name}.png').exists(), self.maskP / f'{name}.png'
             gt = load_mask(self.maskP / f'{name}.png')
             pred_img = load_mask(pred)
@@ -185,11 +176,22 @@ class Evaluator():
                 if CYST_df is None: CYST_df = pd.DataFrame(columns=pd.concat([CYST_s, pd.Series(cysts[0])]).index)
                 for c in cysts:
                     CYST_df.loc[len(CYST_df)] = pd.concat([CYST_s, pd.Series(c)])
-            
+
+        return IM_df, CYST_df
+    
+    def write_results(self):
+        folder = self.predP.parent.parent
+        datafile_im = folder / "images_table.csv"
+        datafile_cy = folder / "cysts_table.csv"
+        if datafile_im.exists():
+            print(f"> Results tables in {folder.stem} already exists!")
+            return
+        
+        IM_df, CYST_df = self.get_results()
+
         IM_df.to_csv(datafile_im)
         CYST_df.to_csv(datafile_cy)
         print(f'Results saved in "{datafile_im.parent}"')
-        return
 
     def show(self, name, title=None):
         fig, ax = plt.subplots(1,3,figsize=(20,6))
